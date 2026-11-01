@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance Management &bull; Multimodal Attendance & Engagement Agent{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Attendance Management</h1>
+        <p class="subtitle">Session Date: <strong>{{ stats.today_date }}</strong> &bull; Live Student Presence Checklist</p>
+    </div>
+    <div class="header-actions">
+        <a href="#registerSection" class="btn btn-primary">+ Add New Student</a>
+        <a href="{{ url_for('download_csv') }}" class="btn btn-outline">Export CSV</a>
+    </div>
+</div>
+
+<!-- Attendance Summary Counters -->
+<div class="stats-grid-small">
+    <div class="mini-stat-card">
+        <span class="mini-label">Total Registered</span>
+        <span class="mini-val">{{ stats.total_students }}</span>
+    </div>
+    <div class="mini-stat-card text-success">
+        <span class="mini-label">Present</span>
+        <span class="mini-val">{{ stats.present_count }}</span>
+    </div>
+    <div class="mini-stat-card text-warning">
+        <span class="mini-label">Late</span>
+        <span class="mini-val">{{ stats.late_count }}</span>
+    </div>
+    <div class="mini-stat-card text-danger">
+        <span class="mini-label">Absent</span>
+        <span class="mini-val">{{ stats.absent_count }}</span>
+    </div>
+</div>
+
+<!-- Attendance Roster Card -->
+<div class="card mt-4">
+    <div class="card-header flex-between">
+        <h3>Classroom Attendance Checklist</h3>
+        <div class="search-box">
+            <input type="text" id="studentSearchInput" placeholder="Search by name or roll number..." class="form-control form-control-sm">
+        </div>
+    </div>
+    <div class="card-body no-padding">
+        <div class="table-responsive">
+            <table class="data-table" id="attendanceTable">
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Roll Number</th>
+                        <th>Department</th>
+                        <th>Status</th>
+                        <th>Duration</th>
+                        <th>Sustained Presence</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in students %}
+                    <tr class="student-row">
+                        <td>
+                            <div class="student-identity">
+                                <div class="avatar">{{ s.name[0] }}</div>
+                                <div>
+                                    <strong>{{ s.name }}</strong>
+                                </div>
+                            </div>
+                        </td>
+                        <td><code>{{ s.roll_no }}</code></td>
+                        <td>{{ s.department }}</td>
+                        <td>
+                            {% if s.status == 'Present' %}
+                                <span class="badge badge-success">Present</span>
+                            {% elif s.status == 'Late' %}
+                                <span class="badge badge-warning">Late</span>
+                            {% else %}
+                                <span class="badge badge-danger">Absent</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ s.total_duration_minutes }} mins</td>
+                        <td>
+                            {% if s.status == 'Present' %}
+                                <span class="text-success">&#10004; Verified</span>
+                            {% elif s.status == 'Late' %}
+                                <span class="text-warning">&#9888; Partial</span>
+                            {% else %}
+                                <span class="text-muted">&mdash; None</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-right">
+                            <div class="action-btn-group">
+                                <form action="{{ url_for('mark_attendance') }}" method="POST" class="inline-form">
+                                    <input type="hidden" name="participant_id" value="{{ s.id }}">
+                                    <input type="hidden" name="status" value="Present">
+                                    <button type="submit" class="btn btn-xs btn-success {% if s.status == 'Present' %}btn-disabled{% endif %}">
+                                        Present
+                                    </button>
+                                </form>
+                                <form action="{{ url_for('mark_attendance') }}" method="POST" class="inline-form">
+                                    <input type="hidden" name="participant_id" value="{{ s.id }}">
+                                    <input type="hidden" name="status" value="Late">
+                                    <button type="submit" class="btn btn-xs btn-warning {% if s.status == 'Late' %}btn-disabled{% endif %}">
+                                        Late
+                                    </button>
+                                </form>
+                                <form action="{{ url_for('mark_attendance') }}" method="POST" class="inline-form">
+                                    <input type="hidden" name="participant_id" value="{{ s.id }}">
+                                    <input type="hidden" name="status" value="Absent">
+                                    <button type="submit" class="btn btn-xs btn-danger {% if s.status == 'Absent' %}btn-disabled{% endif %}">
+                                        Absent
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add New Student Section -->
+<div class="card mt-4" id="registerSection">
+    <div class="card-header">
+        <h3>➕ Register New Student</h3>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('add_student') }}" method="POST" class="form-grid">
+            <div class="form-group">
+                <label for="name">Full Name <span class="text-danger">*</span></label>
+                <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Maya Krishnan" required>
+            </div>
+
+            <div class="form-group">
+                <label for="roll_no">Roll / Student ID <span class="text-danger">*</span></label>
+                <input type="text" id="roll_no" name="roll_no" class="form-control" placeholder="e.g. CS-2024-009" required>
+            </div>
+
+            <div class="form-group">
+                <label for="department">Department / Specialization</label>
+                <input type="text" id="department" name="department" class="form-control" placeholder="e.g. Artificial Intelligence">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Campus Email</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="e.g. maya.krishnan@campus.edu">
+            </div>
+
+            <div class="form-group-full">
+                <button type="submit" class="btn btn-primary">Save & Register for Today</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const searchInput = document.getElementById("studentSearchInput");
+    const tableRows = document.querySelectorAll("#attendanceTable tbody tr");
+
+    searchInput.addEventListener("input", function() {
+        const query = this.value.toLowerCase().trim();
+        tableRows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(query) ? "" : "none";
+        });
+    });
+});
+</script>
+{% endblock %}

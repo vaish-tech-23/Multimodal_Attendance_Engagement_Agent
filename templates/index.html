@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard &bull; Multimodal Attendance & Engagement Agent{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Classroom Overview Dashboard</h1>
+        <p class="subtitle">Session Date: <strong>{{ stats.today_date }}</strong> &bull; Real-time Monitoring & Attendance Metrics</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('attendance') }}" class="btn btn-primary">Mark Attendance</a>
+        <a href="{{ url_for('suggestions') }}" class="btn btn-outline">AI Recommendations</a>
+    </div>
+</div>
+
+<!-- Key Stat Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon bg-blue">👥</div>
+        <div class="stat-info">
+            <span class="stat-label">Total Enrolled</span>
+            <span class="stat-value">{{ stats.total_students }}</span>
+            <span class="stat-sub">Registered Participants</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon bg-green">✅</div>
+        <div class="stat-info">
+            <span class="stat-label">Attendance Rate</span>
+            <span class="stat-value">{{ stats.attendance_rate }}%</span>
+            <span class="stat-sub">{{ stats.present_count }} Present &bull; {{ stats.absent_count }} Absent</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon bg-purple">🎯</div>
+        <div class="stat-info">
+            <span class="stat-label">Avg Engagement</span>
+            <span class="stat-value">{{ stats.avg_engagement }}%</span>
+            <span class="stat-sub">Attention & Focus Index</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon bg-amber">⚡</div>
+        <div class="stat-info">
+            <span class="stat-label">Session Status</span>
+            <span class="stat-value text-success">Active</span>
+            <span class="stat-sub">Sustained Presence Active</span>
+        </div>
+    </div>
+</div>
+
+<!-- Charts & Visual Analytics Section -->
+<div class="grid-2col">
+    <!-- Chart 1: Attendance Breakdown -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Attendance Distribution</h3>
+            <span class="badge badge-info">Today</span>
+        </div>
+        <div class="card-body">
+            <div class="chart-container">
+                <canvas id="attendanceChart"></canvas>
+            </div>
+            <div class="chart-legend-custom">
+                <span><span class="dot bg-success"></span> Present: {{ stats.present_count }}</span>
+                <span><span class="dot bg-warning"></span> Late: {{ stats.late_count }}</span>
+                <span><span class="dot bg-danger"></span> Absent: {{ stats.absent_count }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart 2: Engagement Level Breakdown -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Multimodal Engagement Profile</h3>
+            <span class="badge badge-purple">Simulated Stream</span>
+        </div>
+        <div class="card-body">
+            <div class="chart-container">
+                <canvas id="engagementBarChart"></canvas>
+            </div>
+            <p class="chart-caption text-muted">Evaluated via head orientation, movement frequency, and inactivity indicators.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Section: Recent AI Suggestions & Quick Overview -->
+<div class="grid-2col mt-4">
+    <!-- Recent Suggestions -->
+    <div class="card">
+        <div class="card-header">
+            <h3>💡 Recent AI Teaching Suggestions</h3>
+            <a href="{{ url_for('suggestions') }}" class="btn btn-sm btn-outline">View All</a>
+        </div>
+        <div class="card-body">
+            {% if stats.recent_suggestions %}
+                <ul class="suggestion-list">
+                    {% for item in stats.recent_suggestions %}
+                        <li class="suggestion-item border-{{ item.severity }}">
+                            <div class="suggestion-title-row">
+                                <span class="badge badge-{{ item.severity }}">{{ item.suggestion_type }}</span>
+                                <small class="text-muted">{{ item.rule_name }}</small>
+                            </div>
+                            <p class="suggestion-msg">{{ item.message }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">No suggestions generated yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- System Highlights Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3>🚀 Multimodal Agent Modules</h3>
+            <span class="badge badge-success">Operational</span>
+        </div>
+        <div class="card-body">
+            <div class="feature-item">
+                <div class="feature-bullet">1</div>
+                <div>
+                    <strong>Automated Attendance & Sustained Presence</strong>
+                    <p class="text-muted">Tracks student entry and verifies continuous attendance thresholds (e.g. 45+ minutes).</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-bullet">2</div>
+                <div>
+                    <strong>Head Pose & Inactivity Analysis</strong>
+                    <p class="text-muted">Analyzes pitch, yaw, and prolonged static posture to gauge participant attention.</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-bullet">3</div>
+                <div>
+                    <strong>Rule-Based AI Teaching Heuristics</strong>
+                    <p class="text-muted">Automatically triggers targeted pedagogical intervention tips during session dips.</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-bullet">4</div>
+                <div>
+                    <strong>Exportable Attendance Audit Logs</strong>
+                    <p class="text-muted">Generate instant timestamped CSV reports for institution submission and record-keeping.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Attendance Doughnut Chart
+    const ctxAttendance = document.getElementById('attendanceChart').getContext('2d');
+    new Chart(ctxAttendance, {
+        type: 'doughnut',
+        data: {
+            labels: ['Present', 'Late', 'Absent'],
+            datasets: [{
+                data: [{{ stats.present_count }}, {{ stats.late_count }}, {{ stats.absent_count }}],
+                backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+
+    // Engagement Bar Chart
+    const ctxEngagement = document.getElementById('engagementBarChart').getContext('2d');
+    new Chart(ctxEngagement, {
+        type: 'bar',
+        data: {
+            labels: ['High Attention (80-100%)', 'Moderate (60-79%)', 'Low / Inattentive (<60%)'],
+            datasets: [{
+                label: 'Number of Students',
+                data: [5, 1, 2],
+                backgroundColor: ['#8b5cf6', '#3b82f6', '#f59e0b'],
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

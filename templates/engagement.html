@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Engagement Analysis &bull; Multimodal Attendance & Engagement Agent{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Multimodal Engagement Analysis</h1>
+        <p class="subtitle">Head Pose Orientation &bull; Movement Detection &bull; Attention Scoring</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('suggestions') }}" class="btn btn-primary">View Teaching Suggestions</a>
+    </div>
+</div>
+
+<!-- Simulated Smart Camera Monitor Card -->
+<div class="card mb-4">
+    <div class="card-header flex-between">
+        <h3>📹 Live Classroom Multimodal Vision Monitor</h3>
+        <span class="badge badge-success"><span class="pulse-dot"></span> FEED SIMULATED ACTIVE</span>
+    </div>
+    <div class="card-body">
+        <div class="camera-stream-mockup">
+            <div class="camera-overlay">
+                <div class="camera-header-hud">
+                    <span>LIVE CAM #01 - ROOM 402</span>
+                    <span id="hudTimestamp">FPS: 30 &bull; RESOLUTION: 1080P</span>
+                </div>
+
+                <!-- Simulated Bounding Boxes -->
+                <div class="hud-box box-1">
+                    <span class="hud-label">Aarav Sharma [92% Attention]</span>
+                    <span class="hud-sub">Pose: Forward | Active</span>
+                </div>
+
+                <div class="hud-box box-2">
+                    <span class="hud-label">Priya Patel [88% Attention]</span>
+                    <span class="hud-sub">Pose: Forward | Active</span>
+                </div>
+
+                <div class="hud-box box-3 box-warning">
+                    <span class="hud-label">Rohan Mehta [54% Attention]</span>
+                    <span class="hud-sub">Pose: Down (Phone) | Inactive</span>
+                </div>
+
+                <div class="camera-footer-hud">
+                    <span>AI Detection: Face Mesh Active &bull; Head Pose Estimation Active &bull; Audio Energy: 42dB</span>
+                </div>
+            </div>
+        </div>
+        <p class="text-muted mt-2 font-sm">
+            <em>*Note: This view showcases how the agent's multimodal computer-vision pipeline detects participants, estimates 3D head orientation (pitch/yaw/roll), and flags inactive postures.</em>
+        </p>
+    </div>
+</div>
+
+<!-- Individual Student Engagement Scores Table -->
+<div class="card">
+    <div class="card-header">
+        <h3>Participant Attention & Focus Metrics</h3>
+    </div>
+    <div class="card-body no-padding">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Participant</th>
+                        <th>Roll Number</th>
+                        <th>Head Orientation</th>
+                        <th>Movement Level</th>
+                        <th>Inactivity Status</th>
+                        <th>Engagement Score</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in records %}
+                    <tr>
+                        <td><strong>{{ r.name }}</strong></td>
+                        <td><code>{{ r.roll_no }}</code></td>
+                        <td>
+                            {% if 'Forward' in r.head_pose %}
+                                <span class="badge badge-success">&#128065; {{ r.head_pose }}</span>
+                            {% elif 'Down' in r.head_pose %}
+                                <span class="badge badge-danger">&#128315; {{ r.head_pose }}</span>
+                            {% else %}
+                                <span class="badge badge-warning">&#8596; {{ r.head_pose }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ r.movement_level }}</td>
+                        <td>
+                            {% if r.inactivity_flag == 1 %}
+                                <span class="text-danger font-weight-bold">&#9888; Prolonged Inactivity</span>
+                            {% else %}
+                                <span class="text-success">&#10004; Active Motion</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill {% if r.engagement_score >= 80 %}bg-success{% elif r.engagement_score >= 65 %}bg-info{% else %}bg-danger{% endif %}" 
+                                     style="width: {{ r.engagement_score }}%;">
+                                </div>
+                                <span class="progress-bar-text">{{ r.engagement_score }}%</span>
+                            </div>
+                        </td>
+                        <td>
+                            {% if r.attention_status == 'High' %}
+                                <span class="badge badge-success">High Focus</span>
+                            {% elif r.attention_status == 'Moderate' %}
+                                <span class="badge badge-info">Moderate</span>
+                            {% else %}
+                                <span class="badge badge-danger">Needs Check-in</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Multimodal Heuristics Explanation -->
+<div class="grid-3col mt-4">
+    <div class="card p-3">
+        <h4>📐 1. Head Pose & Gaze</h4>
+        <p class="text-muted font-sm">Calculates 3D facial pitch and yaw angles to determine whether students are facing the instructor/screen or looking down/sideways.</p>
+    </div>
+    <div class="card p-3">
+        <h4>🏃 2. Movement & Motion</h4>
+        <p class="text-muted font-sm">Monitors bounding box optical shift over sliding 30-second windows to distinguish active listeners from disengaged or static students.</p>
+    </div>
+    <div class="card p-3">
+        <h4>🎙️ 3. Audio & Inactivity</h4>
+        <p class="text-muted font-sm">Flags prolonged periods of complete stillness (>10 minutes) and correlates classroom ambient noise with student responsiveness.</p>
+    </div>
+</div>
+{% endblock %}

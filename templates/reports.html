@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Reports & Audit History &bull; Multimodal Attendance & Engagement Agent{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Attendance Reports & Audit History</h1>
+        <p class="subtitle">Complete historical presence logs with timestamp verification and CSV export</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('download_csv', date=selected_date) }}" class="btn btn-primary">
+            📥 Download Attendance CSV
+        </a>
+    </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="card p-3 mb-4">
+    <form method="GET" action="{{ url_for('reports') }}" class="filter-row">
+        <div class="filter-item">
+            <label for="dateFilter">Filter by Session Date:</label>
+            <input type="date" id="dateFilter" name="date" class="form-control" value="{{ selected_date }}">
+        </div>
+        <div class="filter-actions">
+            <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+            <a href="{{ url_for('reports') }}" class="btn btn-outline btn-sm">Clear Filter</a>
+        </div>
+    </form>
+</div>
+
+<!-- History Table Card -->
+<div class="card">
+    <div class="card-header flex-between">
+        <h3>Historical Records ({{ history|length }} Total Sessions Logged)</h3>
+        {% if selected_date %}
+            <span class="badge badge-info">Filtered: {{ selected_date }}</span>
+        {% else %}
+            <span class="badge badge-info">All Recorded Sessions</span>
+        {% endif %}
+    </div>
+    <div class="card-body no-padding">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Student Name</th>
+                        <th>Roll Number</th>
+                        <th>Department</th>
+                        <th>Status</th>
+                        <th>First Seen</th>
+                        <th>Last Seen</th>
+                        <th>Duration</th>
+                        <th>Sustained Presence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for h in history %}
+                    <tr>
+                        <td><strong>{{ h.session_date }}</strong></td>
+                        <td>{{ h.name }}</td>
+                        <td><code>{{ h.roll_no }}</code></td>
+                        <td>{{ h.department }}</td>
+                        <td>
+                            {% if h.status == 'Present' %}
+                                <span class="badge badge-success">Present</span>
+                            {% elif h.status == 'Late' %}
+                                <span class="badge badge-warning">Late</span>
+                            {% else %}
+                                <span class="badge badge-danger">Absent</span>
+                            {% endif %}
+                        </td>
+                        <td><small>{{ h.first_seen or 'N/A' }}</small></td>
+                        <td><small>{{ h.last_seen or 'N/A' }}</small></td>
+                        <td>{{ h.total_duration_minutes }} mins</td>
+                        <td>
+                            {% if h.status == 'Present' %}
+                                <span class="text-success">&#10004; Verified (45m+)</span>
+                            {% elif h.status == 'Late' %}
+                                <span class="text-warning">&#9888; Partial Presence</span>
+                            {% else %}
+                                <span class="text-muted">&mdash; Not Detected</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center p-4 text-muted">
+                            No attendance records found for this date.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

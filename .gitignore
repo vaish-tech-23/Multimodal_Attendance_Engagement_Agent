@@ -1,0 +1,47 @@
+# Python Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+*.venv
+
+# Python Bytecode & Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pytest_cache/
+.coverage
+htmlcov/
+
+# Local SQLite Databases
+*.db
+*.sqlite
+*.sqlite3
+attendance_engagement.db
+
+# Environment variables & secrets
+.env
+.env.*
+*.env
+*.key
+*.pem
+secrets.json
+
+# Dynamic uploads and generated reports (preserves .gitkeep placeholders)
+uploads/*
+!uploads/.gitkeep
+reports/*
+!reports/.gitkeep
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+
+# OS Generated Files
+Thumbs.db
+Desktop.ini
+.DS_Store

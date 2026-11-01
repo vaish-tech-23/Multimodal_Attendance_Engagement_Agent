@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}AI Teaching Suggestions &bull; Multimodal Attendance & Engagement Agent{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>AI Teaching Suggestions & Insights</h1>
+        <p class="subtitle">Rule-based pedagogical recommendations generated from real-time classroom multimodal analytics</p>
+    </div>
+    <div class="header-actions">
+        <form action="{{ url_for('refresh_suggestions') }}" method="POST">
+            <button type="submit" class="btn btn-primary">⚡ Run Rule Evaluation Now</button>
+        </form>
+    </div>
+</div>
+
+<!-- Active Classroom Metrics Summary -->
+<div class="stats-grid-small mb-4">
+    <div class="mini-stat-card">
+        <span class="mini-label">Current Attendance Rate</span>
+        <span class="mini-val">{{ stats.attendance_rate }}%</span>
+    </div>
+    <div class="mini-stat-card">
+        <span class="mini-label">Current Attention Index</span>
+        <span class="mini-val">{{ stats.avg_engagement }}%</span>
+    </div>
+    <div class="mini-stat-card">
+        <span class="mini-label">Students Present</span>
+        <span class="mini-val text-success">{{ stats.present_count }}</span>
+    </div>
+    <div class="mini-stat-card">
+        <span class="mini-label">Students Absent</span>
+        <span class="mini-val text-danger">{{ stats.absent_count }}</span>
+    </div>
+</div>
+
+<!-- AI Suggestions List -->
+<div class="card">
+    <div class="card-header flex-between">
+        <h3>Generated Pedagogical Action Items</h3>
+        <span class="badge badge-info">Rule Engine: Local Heuristics</span>
+    </div>
+    <div class="card-body">
+        <div class="suggestion-deck">
+            {% for s in suggestions %}
+            <div class="suggestion-box severity-{{ s.severity }}">
+                <div class="suggestion-box-header">
+                    <div class="suggestion-meta">
+                        <span class="badge badge-{{ s.severity }}">{{ s.suggestion_type }}</span>
+                        <strong class="rule-tag">{{ s.rule_name }}</strong>
+                    </div>
+                    <small class="timestamp text-muted">{{ s.timestamp }}</small>
+                </div>
+                <div class="suggestion-box-body">
+                    <p>{{ s.message }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Teaching Rule Engine Specifications -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h3>🧠 How the Rule-Based AI Engine Operates</h3>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Rule ID</th>
+                        <th>Multimodal Signal / Trigger</th>
+                        <th>Condition Threshold</th>
+                        <th>Recommended Instructor Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>RULE-01</strong></td>
+                        <td>Classroom Attendance Deficit</td>
+                        <td>Attendance Rate &lt; 75%</td>
+                        <td>Triggers automated prompt to publish session recording, notes, and homework sync.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>RULE-02</strong></td>
+                        <td>Classroom Focus Dip</td>
+                        <td>Average Attention &lt; 70%</td>
+                        <td>Recommends pausing lecture for a 2-minute breakout discussion, poll, or icebreaker.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>RULE-03</strong></td>
+                        <td>High Focus Window</td>
+                        <td>Average Attention &gt; 85%</td>
+                        <td>Advises instructor to introduce high-difficulty theoretical concepts while focus is peak.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>RULE-04</strong></td>
+                        <td>Static Posture / Distraction</td>
+                        <td>Head pitch &lt; -20&deg; for &gt; 5 mins</td>
+                        <td>Identifies participants likely distracted by phone or laptop and suggests direct verbal check-in.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
