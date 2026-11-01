@@ -2,3 +2,4 @@
 # Runs natively on Windows 11 with Python 3.13 without heavy C-extension or wheel conflicts.
 
 Flask>=3.1.0
+gunicorn
